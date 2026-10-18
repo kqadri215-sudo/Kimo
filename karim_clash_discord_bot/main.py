@@ -18,16 +18,21 @@ intents.message_content = True
 class MyBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix="!", intents=intents)
-        # إنشاء عميل كلاش
-        self.coc_client = coc.Client()
+        self.coc_client = None
 
     async def setup_hook(self):
-        # تسجيل الدخول لـ CoC عند إعداد البوت
+        # إنشاء وتسجيل دخول عميل كلاش بعد فتح الـ asyncio event loop
         try:
+            self.coc_client = coc.Client()
             await self.coc_client.login(COC_EMAIL, COC_PASSWORD)
             print("Successfully logged into Clash of Clans API!")
         except Exception as e:
             print(f"CoC Login Exception: {e}")
+
+    async def close(self):
+        if self.coc_client:
+            await self.coc_client.close()
+        await super().close()
 
 bot = MyBot()
 
@@ -38,6 +43,10 @@ async def on_ready():
 
 @bot.command(name="legend", help="جلب إحصائيات دوري الأساطير للاعب")
 async def legend_stats(ctx, player_tag: str):
+    if not bot.coc_client:
+        await ctx.send("❌ لم يتم الاتصال بـ Clash API بعد.")
+        return
+
     if not player_tag.startswith("#"):
         player_tag = "#" + player_tag
 
@@ -71,7 +80,7 @@ async def legend_stats(ctx, player_tag: str):
         await ctx.send(embed=embed)
 
     except coc.NotFound:
-        await ctx.send(f"❌ لم يتم العثور على لاعب بالتايج: `{player_tag}`")
+        await ctx.send(f"❌ لم يتم العثور على لاعب بالتاج: `{player_tag}`")
     except Exception as e:
         await ctx.send(f"⚠️ حدث خطأ: {str(e)}")
 
