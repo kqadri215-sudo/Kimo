@@ -1,0 +1,15 @@
+# Optional Render Blueprint. Add DISCORD_TOKEN and BRAND_NAME in the dashboard.
+services:
+  - type: worker
+    name: karim-clash-discord-bot
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: DISCORD_TOKEN
+        sync: false
+      - key: BRAND_NAME
+        value: Karim Clash
+      - key: CLASHKING_API_BASE
+        value: https://api.clashk.ing
