@@ -1,4 +1,5 @@
 import os
+import asyncio
 import discord
 from discord.ext import commands
 import coc
@@ -16,18 +17,20 @@ intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# إعداد عميل مكتبة Clash of Clans
-coc_client = coc.login(
-    email=COC_EMAIL,
-    password=COC_PASSWORD,
-    key_names="RenderBot",
-    client=coc.EventsClient,
-)
+# إنشاء عميل Clash of Clans
+coc_client = coc.Client()
 
 @bot.event
 async def on_ready():
+    # تسجيل الدخول لـ CoC API عند بدء التشغيل
+    try:
+        await coc_client.login(COC_EMAIL, COC_PASSWORD)
+        print("Connected to Clash of Clans API!")
+    except Exception as e:
+        print(f"CoC Login Error: {e}")
+
     print(f"Logged in as {bot.user.name}")
-    print("Bot is ready and connected to Clash of Clans API!")
+    print("Bot is ready!")
 
 @bot.command(name="legend", help="جلب إحصائيات دوري الأساطير للاعب باستخدام Tag")
 async def legend_stats(ctx, player_tag: str):
